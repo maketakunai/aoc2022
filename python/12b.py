@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+import collections
+
+def find_steps(heightmap, start, target):
+    row = len(heightmap)
+    col = len(heightmap[0])
+
+    visited = [[0] * col for _ in range(row)]
+
+    queue = collections.deque()
+    queue.append(start)
+
+    directions = [(1,0),(-1,0),(0,1),(0,-1)]
+
+    while queue:
+        y, x = queue.popleft()
+        for dy, dx in directions:
+            new_y, new_x = y + dy, x + dx
+            if (new_y in range(row)) and (new_x in range(col)) and (visited[new_y][new_x] == 0) and (heightmap[new_y][new_x] <= heightmap[y][x] + 1):
+                visited[new_y][new_x] = visited[y][x] + 1
+                queue.append((new_y, new_x))
+
+    return(visited[target[0]][target[1]])
+
+
+with open('./input/12_input.txt') as input_file:
+    heightmap = [[*line] for line in input_file.read().splitlines()]
+    start_coords = []
+    for y in range(len(heightmap)):
+        for x in range(len(heightmap[0])):
+            if heightmap[y][x] == 'S' or heightmap[y][x] == 'a':
+                start_coords.append((y,x))
+                heightmap[y][x] = ord('a')-ord('a')
+            elif heightmap[y][x] == 'E':
+                target_coords = (y,x)
+                heightmap[y][x] = ord('z')-ord('a')
+            else:
+                heightmap[y][x] = ord(heightmap[y][x])-ord('a')
+
+    answers = []
+
+    for s in start_coords:
+        result = find_steps(heightmap,s,target_coords)
+        if result > 0:
+            answers.append(result)
+    print(min(answers))
